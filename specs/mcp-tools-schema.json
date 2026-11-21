@@ -1,0 +1,110 @@
+
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.invalid/specs/mcp-tools-schema.json",
+  "title": "Payment MCP Tools Schema",
+  "description": "Contrato de ferramentas MCP para monitoramento e recuperacao controlada de pagamentos.",
+  "version": "2.0.0",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "server",
+    "tools",
+    "security"
+  ],
+  "properties": {
+    "server": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "name",
+        "version",
+        "protocol"
+      ],
+      "properties": {
+        "name": {
+          "type": "string",
+          "const": "payment-operations-mcp"
+        },
+        "version": {
+          "type": "string",
+          "const": "2.0.0"
+        },
+        "protocol": {
+          "type": "string",
+          "const": "MCP"
+        }
+      }
+    },
+    "tools": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/tool"
+      },
+      "minItems": 1
+    },
+    "security": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "authentication_required",
+        "authorization_required",
+        "tls_required",
+        "audit_enabled",
+        "direct_payment_execution"
+      ],
+      "properties": {
+        "authentication_required": {
+          "type": "boolean",
+          "const": true
+        },
+        "authorization_required": {
+          "type": "boolean",
+          "const": true
+        },
+        "tls_required": {
+          "type": "boolean",
+          "const": true
+        },
+        "audit_enabled": {
+          "type": "boolean",
+          "const": true
+        },
+        "direct_payment_execution": {
+          "type": "boolean",
+          "const": false
+        }
+      }
+    }
+  },
+  "$defs": {
+    "tool": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "name",
+        "description",
+        "inputSchema"
+      ],
+      "properties": {
+        "name": {
+          "type": "string",
+          "enum": [
+            "get_payment_status",
+            "inspect_payment_error",
+            "request_reconciliation",
+            "request_reprocessing",
+            "get_system_health"
+          ]
+        },
+        "description": {
+          "type": "string",
+          "minLength": 10
+        },
+        "inputSchema": {
+          "type": "object"
+        }
+      }
+    }
+  }
+}
