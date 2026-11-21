@@ -1,0 +1,2246 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kafka Offset Bridge | Engineering Console</title>
+
+<style>
+:root {
+    --bg: #f4f6f9;
+    --surface: #ffffff;
+    --surface-soft: #f8fafc;
+    --border: #e5eaf0;
+    --text: #172438;
+    --muted: #758399;
+    --navy: #142b46;
+    --navy-light: #203e60;
+    --blue: #3478c5;
+    --blue-soft: #eaf2fc;
+    --orange: #e98b37;
+    --orange-soft: #fff3e6;
+    --green: #239b70;
+    --green-soft: #e8f7f0;
+    --red: #d9534f;
+    --red-soft: #fff0ef;
+    --shadow: 0 3px 14px rgba(20, 43, 70, .045);
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    font-size: 13px;
+}
+
+button {
+    font-family: inherit;
+    cursor: pointer;
+}
+
+.layout {
+    min-height: 100vh;
+}
+
+/* HEADER */
+
+.header {
+    height: 65px;
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 30px;
+    gap: 20px;
+}
+
+.brand {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.brand-icon {
+    width: 35px;
+    height: 35px;
+    border-radius: 9px;
+    background: var(--navy);
+    color: white;
+    display: grid;
+    place-items: center;
+    font-weight: 800;
+    font-size: 17px;
+}
+
+.brand-name {
+    font-size: 15px;
+    font-weight: 750;
+    letter-spacing: -.4px;
+}
+
+.brand-subtitle {
+    color: var(--muted);
+    font-size: 10px;
+    margin-top: 3px;
+}
+
+.header-right {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+}
+
+.connection {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    color: var(--green);
+    font-size: 11px;
+    font-weight: 650;
+}
+
+.dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: currentColor;
+}
+
+.environment {
+    border: 1px solid var(--border);
+    padding: 7px 11px;
+    border-radius: 6px;
+    color: var(--muted);
+    font-size: 10px;
+    letter-spacing: .5px;
+}
+
+/* MAIN */
+
+main {
+    max-width: 1500px;
+    margin: auto;
+    padding: 27px 30px 40px;
+}
+
+.page-heading {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    gap: 15px;
+    margin-bottom: 22px;
+}
+
+.eyebrow {
+    color: var(--blue);
+    font-size: 10px;
+    font-weight: 750;
+    letter-spacing: 1.5px;
+    margin-bottom: 8px;
+}
+
+h1 {
+    font-size: 25px;
+    letter-spacing: -.8px;
+    color: var(--navy);
+}
+
+.page-description {
+    color: var(--muted);
+    margin-top: 7px;
+    font-size: 12px;
+}
+
+.actions {
+    display: flex;
+    gap: 9px;
+}
+
+.btn {
+    border: 1px solid var(--border);
+    background: white;
+    color: var(--navy);
+    padding: 9px 14px;
+    border-radius: 6px;
+    font-size: 11px;
+    font-weight: 650;
+    transition: .2s;
+}
+
+.btn:hover {
+    border-color: var(--blue);
+    color: var(--blue);
+}
+
+.btn-primary {
+    background: var(--navy);
+    color: white;
+    border-color: var(--navy);
+}
+
+.btn-primary:hover {
+    background: var(--navy-light);
+    color: white;
+}
+
+.btn-orange {
+    background: var(--orange-soft);
+    color: #b9681c;
+    border-color: #f5d9bb;
+}
+
+/* STATUS BAR */
+
+.status-bar {
+    display: flex;
+    align-items: center;
+    gap: 22px;
+    padding: 11px 15px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    margin-bottom: 18px;
+    flex-wrap: wrap;
+}
+
+.status-item {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    color: var(--muted);
+    font-size: 10px;
+}
+
+.status-item strong {
+    color: var(--text);
+    font-weight: 700;
+}
+
+/* METRICS */
+
+.metrics {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 14px;
+    margin-bottom: 19px;
+}
+
+.metric {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 17px;
+    box-shadow: var(--shadow);
+}
+
+.metric-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.metric-label {
+    color: var(--muted);
+    font-size: 11px;
+    font-weight: 600;
+}
+
+.metric-icon {
+    width: 29px;
+    height: 29px;
+    border-radius: 7px;
+    display: grid;
+    place-items: center;
+    font-weight: 800;
+    font-size: 14px;
+}
+
+.metric-value {
+    font-size: 27px;
+    font-weight: 750;
+    color: var(--navy);
+    margin-top: 12px;
+    letter-spacing: -.8px;
+}
+
+.metric-footer {
+    margin-top: 8px;
+    font-size: 10px;
+    color: var(--muted);
+}
+
+.metric-footer span {
+    color: var(--green);
+    font-weight: 700;
+}
+
+/* PANELS */
+
+.panel {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    box-shadow: var(--shadow);
+    overflow: hidden;
+}
+
+.panel-header {
+    padding: 15px 18px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+}
+
+.panel-title {
+    font-size: 12px;
+    font-weight: 750;
+    color: var(--navy);
+}
+
+.panel-subtitle {
+    color: var(--muted);
+    font-size: 10px;
+    margin-top: 4px;
+}
+
+.panel-content {
+    padding: 17px;
+}
+
+.section-grid {
+    display: grid;
+    grid-template-columns: 1.35fr 1fr;
+    gap: 17px;
+    margin-bottom: 18px;
+}
+
+/* EVENT FLOW */
+
+.flow {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 7px;
+}
+
+.flow-node {
+    flex: 1;
+    min-width: 0;
+    padding: 13px 8px;
+    border: 1px solid var(--border);
+    background: var(--surface-soft);
+    border-radius: 7px;
+    text-align: center;
+}
+
+.flow-node strong {
+    display: block;
+    color: var(--navy);
+    font-size: 11px;
+    margin-top: 7px;
+}
+
+.flow-node small {
+    display: block;
+    color: var(--muted);
+    font-size: 9px;
+    margin-top: 4px;
+}
+
+.flow-symbol {
+    color: var(--blue);
+    font-size: 18px;
+}
+
+.flow-arrow {
+    color: #a4afbd;
+    font-size: 18px;
+}
+
+.flow-node.active {
+    border-color: #a9c9ed;
+    background: var(--blue-soft);
+}
+
+.flow-node.agent {
+    border-color: #f0c99f;
+    background: var(--orange-soft);
+}
+
+.flow-node.agent .flow-symbol {
+    color: var(--orange);
+}
+
+/* EVENT TYPES */
+
+.event-types {
+    display: grid;
+    gap: 10px;
+}
+
+.event-type {
+    display: flex;
+    align-items: center;
+    gap: 11px;
+    border: 1px solid var(--border);
+    padding: 10px 12px;
+    border-radius: 7px;
+}
+
+.event-type-icon {
+    width: 32px;
+    height: 32px;
+    border-radius: 7px;
+    display: grid;
+    place-items: center;
+    font-weight: 800;
+    font-size: 11px;
+}
+
+.event-type strong {
+    display: block;
+    font-size: 11px;
+    color: var(--navy);
+}
+
+.event-type small {
+    color: var(--muted);
+    font-size: 9px;
+    display: block;
+    margin-top: 3px;
+}
+
+.event-type-count {
+    margin-left: auto;
+    color: var(--navy);
+    font-weight: 750;
+    font-size: 13px;
+}
+
+/* CONSUMERS */
+
+.consumer-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+    margin-bottom: 18px;
+}
+
+.consumer-card {
+    background: white;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 17px;
+}
+
+.consumer-heading {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 10px;
+}
+
+.consumer-name {
+    font-size: 12px;
+    font-weight: 750;
+    color: var(--navy);
+    overflow-wrap: anywhere;
+}
+
+.consumer-role {
+    color: var(--muted);
+    font-size: 10px;
+    margin-top: 5px;
+}
+
+.pill {
+    border-radius: 20px;
+    padding: 5px 9px;
+    font-size: 9px;
+    font-weight: 750;
+    white-space: nowrap;
+}
+
+.pill-green {
+    background: var(--green-soft);
+    color: var(--green);
+}
+
+.pill-orange {
+    background: var(--orange-soft);
+    color: #b9681c;
+}
+
+.offsets {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    margin-top: 20px;
+    padding: 13px 0;
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+}
+
+.offset-item {
+    padding-left: 10px;
+    border-right: 1px solid var(--border);
+}
+
+.offset-item:last-child {
+    border: 0;
+}
+
+.offset-item span {
+    display: block;
+    font-size: 9px;
+    color: var(--muted);
+}
+
+.offset-item strong {
+    display: block;
+    color: var(--navy);
+    font-size: 19px;
+    margin-top: 6px;
+}
+
+.lag-row {
+    margin-top: 13px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 10px;
+}
+
+.lag-track {
+    height: 5px;
+    background: #edf0f4;
+    border-radius: 10px;
+    margin-top: 9px;
+    overflow: hidden;
+}
+
+.lag-fill {
+    height: 100%;
+    background: var(--blue);
+    width: 0%;
+    border-radius: 10px;
+    transition: width .4s;
+}
+
+.lag-fill.warning {
+    background: var(--orange);
+}
+
+/* TABLE */
+
+.table-wrapper {
+    overflow-x: auto;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    white-space: nowrap;
+}
+
+th {
+    text-align: left;
+    color: var(--muted);
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: .5px;
+    padding: 12px 15px;
+    background: #fafbfd;
+    border-bottom: 1px solid var(--border);
+}
+
+td {
+    padding: 13px 15px;
+    border-bottom: 1px solid #edf0f4;
+    font-size: 10px;
+    color: #536176;
+}
+
+tbody tr:hover {
+    background: #fafbfd;
+}
+
+tbody tr:last-child td {
+    border-bottom: 0;
+}
+
+.event-id {
+    font-weight: 700;
+    color: var(--navy);
+}
+
+.type-tag {
+    display: inline-block;
+    padding: 5px 8px;
+    border-radius: 4px;
+    font-weight: 750;
+    font-size: 9px;
+}
+
+.tag-ted {
+    background: var(--blue-soft);
+    color: var(--blue);
+}
+
+.tag-boleto {
+    background: var(--orange-soft);
+    color: #b9681c;
+}
+
+.tag-debito {
+    background: #edf0f6;
+    color: #53647c;
+}
+
+/* MCP AGENT */
+
+.agent-panel {
+    border: 1px solid #f0d6ba;
+    border-radius: 8px;
+    background: #fffdfa;
+    overflow: hidden;
+}
+
+.agent-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 14px 17px;
+    background: #fff8ef;
+    border-bottom: 1px solid #f2e5d6;
+    gap: 10px;
+}
+
+.agent-heading {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.agent-icon {
+    width: 32px;
+    height: 32px;
+    border-radius: 7px;
+    background: var(--orange-soft);
+    color: var(--orange);
+    display: grid;
+    place-items: center;
+    font-size: 16px;
+    font-weight: 800;
+}
+
+.agent-heading strong {
+    color: var(--navy);
+    font-size: 12px;
+}
+
+.agent-heading small {
+    display: block;
+    color: var(--muted);
+    font-size: 9px;
+    margin-top: 3px;
+}
+
+.agent-body {
+    padding: 15px 17px;
+}
+
+.agent-controls {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 14px;
+}
+
+.agent-console {
+    background: #142438;
+    border-radius: 7px;
+    padding: 14px;
+    color: #d2deec;
+    font-family: Consolas, Monaco, monospace;
+    font-size: 10px;
+    line-height: 1.8;
+    min-height: 132px;
+    max-height: 200px;
+    overflow-y: auto;
+}
+
+.console-line {
+    display: block;
+    overflow-wrap: anywhere;
+}
+
+.console-time {
+    color: #8499b3;
+}
+
+.console-success {
+    color: #74d5aa;
+}
+
+.console-warning {
+    color: #ffbd75;
+}
+
+.console-error {
+    color: #ff8984;
+}
+
+.console-info {
+    color: #8bbcff;
+}
+
+/* REPLAY */
+
+.replay-controls {
+    display: flex;
+    align-items: flex-end;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.field {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.field label {
+    font-size: 9px;
+    color: var(--muted);
+    font-weight: 700;
+}
+
+.field select,
+.field input {
+    height: 34px;
+    border: 1px solid var(--border);
+    border-radius: 5px;
+    padding: 0 9px;
+    font-family: inherit;
+    font-size: 10px;
+    color: var(--navy);
+    background: white;
+    outline: none;
+}
+
+.field select:focus,
+.field input:focus {
+    border-color: var(--blue);
+}
+
+.replay-result {
+    margin-top: 13px;
+    color: var(--muted);
+    font-size: 10px;
+}
+
+/* FOOTER */
+
+.footer {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+    padding-top: 18px;
+    color: var(--muted);
+    font-size: 9px;
+}
+
+/* ANIMATIONS */
+
+@keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: .4; }
+}
+
+.pulse {
+    animation: pulse 1.5s infinite;
+}
+
+@media(max-width: 950px) {
+    .section-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .metrics {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media(max-width: 650px) {
+    .header {
+        padding: 0 14px;
+    }
+
+    main {
+        padding: 20px 13px;
+    }
+
+    .page-heading {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .header-right {
+        gap: 8px;
+    }
+
+    .environment {
+        display: none;
+    }
+
+    .consumer-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .flow {
+        flex-wrap: wrap;
+    }
+
+    .flow-node {
+        min-width: 40%;
+    }
+
+    .flow-arrow {
+        display: none;
+    }
+
+    .metrics {
+        gap: 9px;
+    }
+
+    .metric {
+        padding: 12px;
+    }
+
+    .metric-value {
+        font-size: 23px;
+    }
+
+    .status-bar {
+        gap: 12px;
+    }
+
+    .footer {
+        flex-direction: column;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<div class="layout">
+
+<header class="header">
+
+    <div class="brand">
+        <div class="brand-icon">K</div>
+        <div>
+            <div class="brand-name">Kafka Offset Bridge</div>
+            <div class="brand-subtitle">ENGINEERING & OBSERVABILITY CONSOLE</div>
+        </div>
+    </div>
+
+    <div class="header-right">
+        <div class="connection">
+            <span class="dot pulse"></span>
+            <span id="connectionStatus">SIMULATION ONLINE</span>
+        </div>
+
+        <div class="environment">LOCAL ENVIRONMENT</div>
+    </div>
+
+</header>
+
+<main>
+
+    <div class="page-heading">
+
+        <div>
+            <div class="eyebrow">PLATFORM / EVENT INFRASTRUCTURE</div>
+            <h1>Event Observability</h1>
+            <p class="page-description">
+                Monitoramento de eventos, consumer groups, offsets e recuperação automatizada.
+            </p>
+        </div>
+
+        <div class="actions">
+            <button class="btn" onclick="resetSimulation()">Resetar</button>
+            <button class="btn btn-primary" id="simulationButton" onclick="toggleSimulation()">
+                Pausar simulação
+            </button>
+        </div>
+
+    </div>
+
+    <div class="status-bar">
+
+        <div class="status-item">
+            <span class="dot" style="color:var(--green)"></span>
+            <strong>Kafka Simulator</strong>
+            <span>Operational</span>
+        </div>
+
+        <div class="status-item">
+            <span class="dot" style="color:var(--green)"></span>
+            <strong>MCP Agent</strong>
+            <span>Ready</span>
+        </div>
+
+        <div class="status-item">
+            <strong>Topic:</strong>
+            <span>payment-events</span>
+        </div>
+
+        <div class="status-item">
+            <strong>Partition:</strong>
+            <span>0</span>
+        </div>
+
+        <div class="status-item">
+            <strong>Protocol:</strong>
+            <span>JSON-RPC simulation</span>
+        </div>
+
+    </div>
+
+    <!-- METRICS -->
+
+    <section class="metrics">
+
+        <div class="metric">
+            <div class="metric-top">
+                <span class="metric-label">Total de eventos</span>
+                <div class="metric-icon" style="background:var(--blue-soft);color:var(--blue)">EV</div>
+            </div>
+            <div class="metric-value" id="totalEvents">0</div>
+            <div class="metric-footer">Eventos publicados no tópico</div>
+        </div>
+
+        <div class="metric">
+            <div class="metric-top">
+                <span class="metric-label">Eventos processados</span>
+                <div class="metric-icon" style="background:var(--green-soft);color:var(--green)">✓</div>
+            </div>
+            <div class="metric-value" id="processedEvents">0</div>
+            <div class="metric-footer"><span>Validação de contrato</span></div>
+        </div>
+
+        <div class="metric">
+            <div class="metric-top">
+                <span class="metric-label">Consumer lag</span>
+                <div class="metric-icon" style="background:var(--orange-soft);color:var(--orange)">↗</div>
+            </div>
+            <div class="metric-value" id="totalLag">0</div>
+            <div class="metric-footer">Atraso acumulado dos consumers</div>
+        </div>
+
+        <div class="metric">
+            <div class="metric-top">
+                <span class="metric-label">Erros de contrato</span>
+                <div class="metric-icon" style="background:var(--red-soft);color:var(--red)">!</div>
+            </div>
+            <div class="metric-value" id="errorEvents">0</div>
+            <div class="metric-footer">Eventos aguardando diagnóstico</div>
+        </div>
+
+    </section>
+
+    <!-- FLOW + EVENT TYPES -->
+
+    <section class="section-grid">
+
+        <div class="panel">
+
+            <div class="panel-header">
+                <div>
+                    <div class="panel-title">Event processing pipeline</div>
+                    <div class="panel-subtitle">Fluxo de publicação e processamento dos eventos</div>
+                </div>
+                <span class="pill pill-green">ACTIVE</span>
+            </div>
+
+            <div class="panel-content">
+
+                <div class="flow">
+
+                    <div class="flow-node active">
+                        <div class="flow-symbol">⇧</div>
+                        <strong>Producer</strong>
+                        <small>Publish events</small>
+                    </div>
+
+                    <div class="flow-arrow">→</div>
+
+                    <div class="flow-node active">
+                        <div class="flow-symbol">▤</div>
+                        <strong>Kafka Topic</strong>
+                        <small>payment-events</small>
+                    </div>
+
+                    <div class="flow-arrow">→</div>
+
+                    <div class="flow-node active">
+                        <div class="flow-symbol">✓</div>
+                        <strong>Contract</strong>
+                        <small>Spec-first</small>
+                    </div>
+
+                    <div class="flow-arrow">→</div>
+
+                    <div class="flow-node agent">
+                        <div class="flow-symbol">⚙</div>
+                        <strong>MCP Agent</strong>
+                        <small>Diagnose / Replay</small>
+                    </div>
+
+                </div>
+
+                <div style="margin-top:22px;padding:13px;background:#f8fafc;border-radius:6px;display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap">
+
+                    <div>
+                        <div style="font-size:9px;color:var(--muted)">EVENT STREAM</div>
+                        <strong style="display:block;margin-top:5px;color:var(--navy)">payment-events</strong>
+                    </div>
+
+                    <div>
+                        <div style="font-size:9px;color:var(--muted)">PARTITIONS</div>
+                        <strong style="display:block;margin-top:5px;color:var(--navy)">1</strong>
+                    </div>
+
+                    <div>
+                        <div style="font-size:9px;color:var(--muted)">SERIALIZATION</div>
+                        <strong style="display:block;margin-top:5px;color:var(--navy)">JSON</strong>
+                    </div>
+
+                    <div>
+                        <div style="font-size:9px;color:var(--muted)">STORAGE</div>
+                        <strong style="display:block;margin-top:5px;color:var(--navy)">Event Store</strong>
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        <div class="panel">
+
+            <div class="panel-header">
+                <div>
+                    <div class="panel-title">Payment event distribution</div>
+                    <div class="panel-subtitle">Eventos por categoria</div>
+                </div>
+            </div>
+
+            <div class="panel-content">
+
+                <div class="event-types">
+
+                    <div class="event-type">
+                        <div class="event-type-icon" style="background:var(--blue-soft);color:var(--blue)">T</div>
+                        <div>
+                            <strong>TED</strong>
+                            <small>Transferência eletrônica</small>
+                        </div>
+                        <div class="event-type-count" id="tedCount">0</div>
+                    </div>
+
+                    <div class="event-type">
+                        <div class="event-type-icon" style="background:var(--orange-soft);color:var(--orange)">B</div>
+                        <div>
+                            <strong>Boleto</strong>
+                            <small>Liquidação de cobrança</small>
+                        </div>
+                        <div class="event-type-count" id="boletoCount">0</div>
+                    </div>
+
+                    <div class="event-type">
+                        <div class="event-type-icon" style="background:#edf0f6;color:#53647c">D</div>
+                        <div>
+                            <strong>Débito automático</strong>
+                            <small>Agendamento de pagamento</small>
+                        </div>
+                        <div class="event-type-count" id="debitoCount">0</div>
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </section>
+
+    <!-- CONSUMER GROUPS -->
+
+    <div style="margin-bottom:12px">
+        <div class="panel-title">Consumer group monitoring</div>
+        <div class="panel-subtitle">Offsets independentes por grupo de consumo</div>
+    </div>
+
+    <section class="consumer-grid">
+
+        <div class="consumer-card">
+
+            <div class="consumer-heading">
+                <div>
+                    <div class="consumer-name">cg-pagamentos-real</div>
+                    <div class="consumer-role">Processamento operacional de pagamentos</div>
+                </div>
+                <span class="pill pill-green" id="realStatus">HEALTHY</span>
+            </div>
+
+            <div class="offsets">
+
+                <div class="offset-item">
+                    <span>Latest offset</span>
+                    <strong id="realLatest">0</strong>
+                </div>
+
+                <div class="offset-item">
+                    <span>Committed</span>
+                    <strong id="realCommitted">0</strong>
+                </div>
+
+                <div class="offset-item">
+                    <span>Consumer lag</span>
+                    <strong id="realLag">0</strong>
+                </div>
+
+            </div>
+
+            <div class="lag-row">
+                <span>Offset progress</span>
+                <strong id="realProgress">100%</strong>
+            </div>
+
+            <div class="lag-track">
+                <div class="lag-fill" id="realBar"></div>
+            </div>
+
+        </div>
+
+        <div class="consumer-card">
+
+            <div class="consumer-heading">
+                <div>
+                    <div class="consumer-name">cg-datamesh-regulatorio</div>
+                    <div class="consumer-role">Auditoria, rastreabilidade e observabilidade</div>
+                </div>
+                <span class="pill pill-green" id="dataStatus">HEALTHY</span>
+            </div>
+
+            <div class="offsets">
+
+                <div class="offset-item">
+                    <span>Latest offset</span>
+                    <strong id="dataLatest">0</strong>
+                </div>
+
+                <div class="offset-item">
+                    <span>Committed</span>
+                    <strong id="dataCommitted">0</strong>
+                </div>
+
+                <div class="offset-item">
+                    <span>Consumer lag</span>
+                    <strong id="dataLag">0</strong>
+                </div>
+
+            </div>
+
+            <div class="lag-row">
+                <span>Offset progress</span>
+                <strong id="dataProgress">100%</strong>
+            </div>
+
+            <div class="lag-track">
+                <div class="lag-fill" id="dataBar"></div>
+            </div>
+
+        </div>
+
+    </section>
+
+    <!-- EVENT TABLE -->
+
+    <section class="panel" style="margin-bottom:18px">
+
+        <div class="panel-header">
+            <div>
+                <div class="panel-title">Event stream explorer</div>
+                <div class="panel-subtitle">Eventos publicados e status de validação</div>
+            </div>
+
+            <span class="pill pill-green" id="streamCount">0 EVENTS</span>
+        </div>
+
+        <div class="table-wrapper">
+
+            <table>
+
+                <thead>
+                    <tr>
+                        <th>OFFSET</th>
+                        <th>EVENT ID</th>
+                        <th>EVENT TYPE</th>
+                        <th>TRANSACTION</th>
+                        <th>AMOUNT</th>
+                        <th>CONTRACT</th>
+                        <th>STATUS</th>
+                    </tr>
+                </thead>
+
+                <tbody id="eventTable">
+
+                    <tr>
+                        <td colspan="7" style="text-align:center;color:var(--muted)">
+                            Aguardando eventos...
+                        </td>
+                    </tr>
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </section>
+
+    <!-- MCP AGENT -->
+
+    <section class="agent-panel" style="margin-bottom:18px">
+
+        <div class="agent-header">
+
+            <div class="agent-heading">
+                <div class="agent-icon">⚙</div>
+                <div>
+                    <strong>MCP Diagnostic Agent</strong>
+                    <small>Consumer lag diagnosis · Contract validation · Event replay</small>
+                </div>
+            </div>
+
+            <span class="pill pill-orange" id="agentStatus">AGENT READY</span>
+
+        </div>
+
+        <div class="agent-body">
+
+            <div class="agent-controls">
+
+                <button class="btn btn-orange" onclick="diagnoseLag()">
+                    Diagnosticar offsets
+                </button>
+
+                <button class="btn" onclick="validateContracts()">
+                    Validar contratos
+                </button>
+
+                <button class="btn btn-primary" onclick="agentRecovery()">
+                    Executar recuperação
+                </button>
+
+            </div>
+
+            <div class="agent-console" id="agentConsole">
+
+                <span class="console-line console-info">
+                    [SYSTEM] MCP Diagnostic Agent initialized.
+                </span>
+
+                <span class="console-line">
+                    [SYSTEM] Waiting for diagnostic requests...
+                </span>
+
+                <span class="console-line console-success">
+                    [READY] Tools available: diagnose_consumer_lag, replay_events, commit_offset.
+                </span>
+
+            </div>
+
+        </div>
+
+    </section>
+
+    <!-- REPLAY -->
+
+    <section class="panel">
+
+        <div class="panel-header">
+            <div>
+                <div class="panel-title">Event replay controller</div>
+                <div class="panel-subtitle">Reprocessamento controlado a partir de offsets selecionados</div>
+            </div>
+
+            <span class="pill pill-orange">MANUAL CONTROL</span>
+        </div>
+
+        <div class="panel-content">
+
+            <div class="replay-controls">
+
+                <div class="field">
+                    <label>CONSUMER GROUP</label>
+                    <select id="replayGroup">
+                        <option value="cg-pagamentos-real">cg-pagamentos-real</option>
+                        <option value="cg-datamesh-regulatorio">cg-datamesh-regulatorio</option>
+                    </select>
+                </div>
+
+                <div class="field">
+                    <label>START OFFSET</label>
+                    <input type="number" id="startOffset" min="0" value="0">
+                </div>
+
+                <div class="field">
+                    <label>END OFFSET (EXCLUSIVE)</label>
+                    <input type="number" id="endOffset" min="0" value="0">
+                </div>
+
+                <button class="btn btn-primary" onclick="executeReplay()">
+                    Executar replay
+                </button>
+
+            </div>
+
+            <div class="replay-result" id="replayResult">
+                Nenhum replay executado nesta sessão.
+            </div>
+
+        </div>
+
+    </section>
+
+    <footer class="footer">
+        <span>Kafka Offset Bridge · Engineering Observability</span>
+        <span>Frontend simulation · Native HTML / CSS / JavaScript</span>
+    </footer>
+
+</main>
+
+</div>
+
+<script>
+
+/* =====================================================
+   KAFKA OFFSET BRIDGE - FRONTEND SIMULATOR
+===================================================== */
+
+const state = {
+    events: [],
+    realCommitted: 0,
+    dataCommitted: 0,
+    processed: 0,
+    errors: 0,
+    replayed: 0,
+    paused: false,
+    timer: null,
+    nextId: 1
+};
+
+const EVENT_TYPES = [
+    "TED",
+    "BOLETO",
+    "DEBITO_AUTOMATICO"
+];
+
+const CONSUMER_REAL = "cg-pagamentos-real";
+const CONSUMER_DATA = "cg-datamesh-regulatorio";
+
+function timestamp() {
+    return new Date().toLocaleTimeString("pt-BR");
+}
+
+function money(value) {
+    return value.toLocaleString("pt-BR", {
+        style: "currency",
+        currency: "BRL"
+    });
+}
+
+function log(message, type = "") {
+    const consoleElement = document.getElementById("agentConsole");
+
+    const line = document.createElement("span");
+    line.className = "console-line " + type;
+
+    const time = document.createElement("span");
+    time.className = "console-time";
+    time.textContent = "[" + timestamp() + "] ";
+
+    line.appendChild(time);
+    line.appendChild(document.createTextNode(message));
+
+    consoleElement.appendChild(line);
+
+    while (consoleElement.children.length > 60) {
+        consoleElement.removeChild(consoleElement.firstChild);
+    }
+
+    consoleElement.scrollTop = consoleElement.scrollHeight;
+}
+
+function createEvent(type, invalid = false) {
+
+    const id = state.nextId++;
+
+    const amount = Number(
+        (Math.random() * 2000 + 20).toFixed(2)
+    );
+
+    const event = {
+        offset: state.events.length,
+        event_id: "EVT-" + type.substring(0, 3) + "-" + String(id).padStart(3, "0"),
+        event_type: type,
+        transactionId: "TX-" + String(id).padStart(4, "0"),
+        amount: invalid ? -amount : amount,
+        currency: "BRL",
+        payerDocument: "12345678901",
+        payerAccount: "0001-12345",
+        createdAt: new Date().toISOString(),
+        status: "PENDING",
+        valid: true
+    };
+
+    if (type === "TED") {
+        event.receiverDocument = "98765432100";
+        event.receiverAccount = "0002-98765";
+
+        if (invalid) {
+            delete event.receiverAccount;
+        }
+    }
+
+    if (type === "BOLETO") {
+        event.barcode = invalid
+            ? "12345"
+            : "12345678901234567890123456789012345678901234";
+
+        event.dueDate = "2026-12-10";
+    }
+
+    if (type === "DEBITO_AUTOMATICO") {
+        event.agreementId = "AGREEMENT-" + id;
+        event.scheduledDate = "2026-12-15";
+    }
+
+    return event;
+}
+
+function validateEvent(event) {
+
+    if (!event.event_id ||
+        !event.event_type ||
+        !event.transactionId ||
+        !event.payerDocument ||
+        !event.payerAccount) {
+        return false;
+    }
+
+    if (!EVENT_TYPES.includes(event.event_type)) {
+        return false;
+    }
+
+    if (event.currency !== "BRL") {
+        return false;
+    }
+
+    if (!Number.isFinite(event.amount) || event.amount <= 0) {
+        return false;
+    }
+
+    if (event.event_type === "TED") {
+        return Boolean(
+            event.receiverDocument &&
+            event.receiverAccount
+        );
+    }
+
+    if (event.event_type === "BOLETO") {
+        return Boolean(
+            /^[0-9]{44,48}$/.test(event.barcode || "") &&
+            event.dueDate
+        );
+    }
+
+    if (event.event_type === "DEBITO_AUTOMATICO") {
+        return Boolean(
+            event.agreementId &&
+            event.scheduledDate
+        );
+    }
+
+    return false;
+}
+
+/* =====================================================
+   PRODUCER
+===================================================== */
+
+function publishEvent(type, invalid = false) {
+
+    const event = createEvent(type, invalid);
+
+    event.offset = state.events.length;
+
+    state.events.push(event);
+
+    log(
+        "PRODUCER: Evento publicado | " +
+        event.event_id +
+        " | offset=" + event.offset,
+        "console-info"
+    );
+
+    if (invalid) {
+        log(
+            "CONTRACT WARNING: Evento com dados inconsistentes detectado.",
+            "console-warning"
+        );
+    }
+
+    processConsumers();
+    updateDashboard();
+
+    return event;
+}
+
+/* =====================================================
+   CONSUMER PROCESSING
+===================================================== */
+
+function processConsumer(group) {
+
+    const isReal = group === CONSUMER_REAL;
+
+    const property = isReal
+        ? "realCommitted"
+        : "dataCommitted";
+
+    let committed = state[property];
+
+    if (committed >= state.events.length) {
+        return;
+    }
+
+    const event = state.events[committed];
+
+    if (!event) {
+        return;
+    }
+
+    const valid = validateEvent(event);
+
+    if (!valid) {
+
+        event.status = "REJECTED";
+
+        log(
+            group + ": Contract validation failed at offset " +
+            event.offset,
+            "console-error"
+        );
+
+        return;
+    }
+
+    event.status = "PROCESSED";
+
+    state[property]++;
+
+    if (isReal) {
+        state.processed++;
+    }
+
+    log(
+        group + ": Event processed | offset=" +
+        event.offset + " | " + event.event_id,
+        "console-success"
+    );
+}
+
+function processConsumers() {
+
+    processConsumer(CONSUMER_REAL);
+    processConsumer(CONSUMER_DATA);
+
+}
+
+/* =====================================================
+   DASHBOARD
+===================================================== */
+
+function updateDashboard() {
+
+    const total = state.events.length;
+
+    const realLag = Math.max(
+        0,
+        total - state.realCommitted
+    );
+
+    const dataLag = Math.max(
+        0,
+        total - state.dataCommitted
+    );
+
+    const totalLag = realLag + dataLag;
+
+    const validEvents = state.events.filter(
+        event => validateEvent(event)
+    ).length;
+
+    const invalidEvents = state.events.filter(
+        event => !validateEvent(event)
+    ).length;
+
+    state.errors = invalidEvents;
+
+    document.getElementById("totalEvents").textContent = total;
+
+    document.getElementById("processedEvents").textContent =
+        state.processed;
+
+    document.getElementById("totalLag").textContent =
+        totalLag;
+
+    document.getElementById("errorEvents").textContent =
+        invalidEvents;
+
+    document.getElementById("tedCount").textContent =
+        state.events.filter(e => e.event_type === "TED").length;
+
+    document.getElementById("boletoCount").textContent =
+        state.events.filter(e => e.event_type === "BOLETO").length;
+
+    document.getElementById("debitoCount").textContent =
+        state.events.filter(e => e.event_type === "DEBITO_AUTOMATICO").length;
+
+    document.getElementById("realLatest").textContent = total;
+    document.getElementById("realCommitted").textContent =
+        state.realCommitted;
+
+    document.getElementById("realLag").textContent = realLag;
+
+    document.getElementById("dataLatest").textContent = total;
+    document.getElementById("dataCommitted").textContent =
+        state.dataCommitted;
+
+    document.getElementById("dataLag").textContent = dataLag;
+
+    const realProgress = total === 0
+        ? 100
+        : Math.round(state.realCommitted / total * 100);
+
+    const dataProgress = total === 0
+        ? 100
+        : Math.round(state.dataCommitted / total * 100);
+
+    document.getElementById("realProgress").textContent =
+        realProgress + "%";
+
+    document.getElementById("dataProgress").textContent =
+        dataProgress + "%";
+
+    document.getElementById("realBar").style.width =
+        realProgress + "%";
+
+    document.getElementById("dataBar").style.width =
+        dataProgress + "%";
+
+    updateConsumerStatus(
+        "realStatus",
+        "realBar",
+        realLag
+    );
+
+    updateConsumerStatus(
+        "dataStatus",
+        "dataBar",
+        dataLag
+    );
+
+    document.getElementById("streamCount").textContent =
+        total + " EVENTS";
+
+    renderTable();
+
+}
+
+function updateConsumerStatus(statusId, barId, lag) {
+
+    const status = document.getElementById(statusId);
+    const bar = document.getElementById(barId);
+
+    if (lag === 0) {
+        status.textContent = "HEALTHY";
+        status.className = "pill pill-green";
+        bar.classList.remove("warning");
+    } else if (lag <= 3) {
+        status.textContent = "WARNING";
+        status.className = "pill pill-orange";
+        bar.classList.add("warning");
+    } else {
+        status.textContent = "LAG DETECTED";
+        status.className = "pill pill-orange";
+        bar.classList.add("warning");
+    }
+}
+
+/* =====================================================
+   EVENT TABLE
+===================================================== */
+
+function renderTable() {
+
+    const table = document.getElementById("eventTable");
+
+    if (state.events.length === 0) {
+        table.innerHTML = `
+            <tr>
+                <td colspan="7" style="text-align:center">
+                    Aguardando eventos...
+                </td>
+            </tr>
+        `;
+        return;
+    }
+
+    const rows = state.events.slice().reverse().slice(0, 30);
+
+    table.replaceChildren();
+
+    rows.forEach(event => {
+
+        const row = document.createElement("tr");
+
+        let tagClass = "tag-ted";
+
+        if (event.event_type === "BOLETO") {
+            tagClass = "tag-boleto";
+        }
+
+        if (event.event_type === "DEBITO_AUTOMATICO") {
+            tagClass = "tag-debito";
+        }
+
+        const statusClass = event.status === "REJECTED"
+            ? "pill-orange"
+            : event.status === "PROCESSED"
+                ? "pill-green"
+                : "pill-orange";
+
+        const values = [
+            event.offset,
+            event.event_id,
+            event.event_type,
+            event.transactionId,
+            money(event.amount),
+            validateEvent(event) ? "VALID" : "INVALID",
+            event.status
+        ];
+
+        values.forEach((value, index) => {
+
+            const cell = document.createElement("td");
+
+            if (index === 1) {
+                cell.className = "event-id";
+            }
+
+            if (index === 2) {
+                const tag = document.createElement("span");
+                tag.className = "type-tag " + tagClass;
+                tag.textContent = value;
+                cell.appendChild(tag);
+            } else if (index === 5) {
+                const tag = document.createElement("span");
+                tag.className = "pill " +
+                    (value === "VALID" ? "pill-green" : "pill-orange");
+                tag.textContent = value;
+                cell.appendChild(tag);
+            } else if (index === 6) {
+                const tag = document.createElement("span");
+                tag.className = "pill " + statusClass;
+                tag.textContent = value;
+                cell.appendChild(tag);
+            } else {
+                cell.textContent = value;
+            }
+
+            row.appendChild(cell);
+        });
+
+        table.appendChild(row);
+    });
+}
+
+/* =====================================================
+   MCP DIAGNOSTIC TOOLS
+===================================================== */
+
+function diagnoseLag() {
+
+    log("MCP TOOL: diagnose_consumer_lag invoked.", "console-info");
+
+    const groups = [
+        {
+            name: CONSUMER_REAL,
+            committed: state.realCommitted
+        },
+        {
+            name: CONSUMER_DATA,
+            committed: state.dataCommitted
+        }
+    ];
+
+    groups.forEach(group => {
+
+        const lag = state.events.length - group.committed;
+
+        if (lag > 0) {
+            log(
+                "DIAGNOSIS: " + group.name +
+                " | latest=" + state.events.length +
+                " | committed=" + group.committed +
+                " | lag=" + lag,
+                "console-warning"
+            );
+        } else {
+            log(
+                "HEALTHY: " + group.name +
+                " | committed offset synchronized.",
+                "console-success"
+            );
+        }
+    });
+
+    log("Offset diagnosis completed.", "console-success");
+
+    document.getElementById("agentStatus").textContent =
+        "DIAGNOSIS COMPLETE";
+}
+
+function validateContracts() {
+
+    log("MCP: Starting spec-first contract validation.", "console-info");
+
+    let valid = 0;
+    let invalid = 0;
+
+    state.events.forEach(event => {
+
+        if (validateEvent(event)) {
+            valid++;
+
+            log(
+                "VALID: " + event.event_id +
+                " | " + event.event_type,
+                "console-success"
+            );
+
+        } else {
+            invalid++;
+
+            log(
+                "INVALID: " + event.event_id +
+                " | Contract violation detected.",
+                "console-error"
+            );
+        }
+    });
+
+    log(
+        "VALIDATION SUMMARY: " +
+        valid + " valid | " + invalid + " invalid.",
+        invalid ? "console-warning" : "console-success"
+    );
+
+    document.getElementById("agentStatus").textContent =
+        invalid ? "ISSUES DETECTED" : "CONTRACTS VALID";
+}
+
+/* =====================================================
+   MCP RECOVERY AGENT
+===================================================== */
+
+async function agentRecovery() {
+
+    const button = document.getElementById("agentStatus");
+
+    button.textContent = "RECOVERY RUNNING";
+
+    log("MCP AGENT: Starting recovery workflow.", "console-info");
+
+    log("STEP 1: Diagnosing consumer offsets.", "console-info");
+
+    diagnoseLag();
+
+    await delay(600);
+
+    log("STEP 2: Inspecting rejected events.", "console-info");
+
+    const rejected = state.events.filter(
+        event => !validateEvent(event)
+    );
+
+    if (rejected.length > 0) {
+
+        log(
+            "STEP 3: Found " + rejected.length +
+            " invalid event(s). Starting contract remediation.",
+            "console-warning"
+        );
+
+        await delay(700);
+
+        rejected.forEach(event => {
+
+            if (event.amount <= 0) {
+                event.amount = Math.abs(event.amount) || 1;
+
+                log(
+                    event.event_id +
+                    ": Amount corrected by recovery simulation.",
+                    "console-success"
+                );
+            }
+
+            if (event.event_type === "TED") {
+
+                if (!event.receiverDocument) {
+                    event.receiverDocument = "98765432100";
+                }
+
+                if (!event.receiverAccount) {
+                    event.receiverAccount = "0002-98765";
+                }
+            }
+
+            if (event.event_type === "BOLETO") {
+
+                if (!/^[0-9]{44,48}$/.test(event.barcode || "")) {
+                    event.barcode =
+                        "12345678901234567890123456789012345678901234";
+                }
+
+                if (!event.dueDate) {
+                    event.dueDate = "2026-12-10";
+                }
+            }
+
+            if (event.event_type === "DEBITO_AUTOMATICO") {
+
+                if (!event.agreementId) {
+                    event.agreementId = "AGREEMENT-RECOVERED";
+                }
+
+                if (!event.scheduledDate) {
+                    event.scheduledDate = "2026-12-15";
+                }
+            }
+        });
+
+    } else {
+
+        log(
+            "No contract errors detected. All events are valid.",
+            "console-success"
+        );
+    }
+
+    await delay(600);
+
+    log("STEP 4: Replaying validated events.", "console-info");
+
+    let replayed = 0;
+
+    for (const event of state.events) {
+
+        if (validateEvent(event)) {
+
+            event.status = "PROCESSED";
+            replayed++;
+
+        }
+    }
+
+    state.realCommitted = state.events.length;
+    state.dataCommitted = state.events.length;
+
+    state.processed = state.events.length;
+    state.replayed += replayed;
+
+    await delay(500);
+
+    updateDashboard();
+
+    log(
+        "REPLAY COMPLETE: " + replayed +
+        " event(s) processed.",
+        "console-success"
+    );
+
+    log(
+        "OFFSET COMMIT: " +
+        CONSUMER_REAL + " -> " + state.realCommitted,
+        "console-success"
+    );
+
+    log(
+        "OFFSET COMMIT: " +
+        CONSUMER_DATA + " -> " + state.dataCommitted,
+        "console-success"
+    );
+
+    log(
+        "RECOVERY COMPLETE: All simulated consumer groups synchronized.",
+        "console-success"
+    );
+
+    button.textContent = "RECOVERY SUCCESS";
+    button.className = "pill pill-green";
+
+    document.getElementById("replayResult").textContent =
+        replayed + " eventos reprocessados na simulação.";
+}
+
+function delay(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+/* =====================================================
+   MANUAL REPLAY CONTROLLER
+===================================================== */
+
+function executeReplay() {
+
+    const group = document.getElementById("replayGroup").value;
+
+    const start = Number(
+        document.getElementById("startOffset").value
+    );
+
+    const end = Number(
+        document.getElementById("endOffset").value
+    );
+
+    if (
+        !Number.isInteger(start) ||
+        !Number.isInteger(end) ||
+        start < 0 ||
+        end < start ||
+        end > state.events.length
+    ) {
+
+        log("REPLAY ERROR: Invalid offset range.", "console-error");
+
+        document.getElementById("replayResult").textContent =
+            "Intervalo inválido. Use offsets existentes e end exclusivo.";
+
+        return;
+    }
+
+    log(
+        "MCP TOOL: replay_events invoked | group=" +
+        group + " | range=[" + start + ", " + end + ")",
+        "console-info"
+    );
+
+    let count = 0;
+
+    for (let i = start; i < end; i++) {
+
+        const event = state.events[i];
+
+        if (!validateEvent(event)) {
+
+            log(
+                "REPLAY REJECTED: " + event.event_id +
+                " | Contract invalid.",
+                "console-error"
+            );
+
+            continue;
+        }
+
+        event.status = "PROCESSED";
+
+        count++;
+
+        log(
+            "REPLAYED: " + event.event_id +
+            " | offset=" + i,
+            "console-success"
+        );
+    }
+
+    state.replayed += count;
+
+    const property = group === CONSUMER_REAL
+        ? "realCommitted"
+        : "dataCommitted";
+
+    if (end > state[property]) {
+        state[property] = end;
+    }
+
+    state.processed = state.events.filter(
+        event => event.status === "PROCESSED"
+    ).length;
+
+    updateDashboard();
+
+    document.getElementById("replayResult").textContent =
+        count + " evento(s) válidos reprocessados para " +
+        group + ". Offsets atualizados até " + state[property] + ".";
+
+    log(
+        "REPLAY FINISHED | processed=" + count,
+        "console-success"
+    );
+}
+
+/* =====================================================
+   AUTOMATIC SIMULATION
+===================================================== */
+
+function simulationStep() {
+
+    if (state.paused) {
+        return;
+    }
+
+    const random = Math.random();
+
+    let type;
+
+    if (random < 0.4) {
+        type = "TED";
+    } else if (random < 0.75) {
+        type = "BOLETO";
+    } else {
+        type = "DEBITO_AUTOMATICO";
+    }
+
+    const invalid = Math.random() < 0.13;
+
+    publishEvent(type, invalid);
+}
+
+function toggleSimulation() {
+
+    state.paused = !state.paused;
+
+    const button = document.getElementById("simulationButton");
+
+    if (state.paused) {
+
+        button.textContent = "Retomar simulação";
+
+        log(
+            "SIMULATION PAUSED BY OPERATOR.",
+            "console-warning"
+        );
+
+    } else {
+
+        button.textContent = "Pausar simulação";
+
+        log(
+            "SIMULATION RESUMED.",
+            "console-success"
+        );
+    }
+}
+
+/* =====================================================
+   RESET
+===================================================== */
+
+function resetSimulation() {
+
+    state.events = [];
+    state.realCommitted = 0;
+    state.dataCommitted = 0;
+    state.processed = 0;
+    state.errors = 0;
+    state.replayed = 0;
+    state.nextId = 1;
+    state.paused = false;
+
+    document.getElementById("simulationButton").textContent =
+        "Pausar simulação";
+
+    document.getElementById("agentStatus").textContent =
+        "AGENT READY";
+
+    document.getElementById("agentStatus").className =
+        "pill pill-orange";
+
+    document.getElementById("replayResult").textContent =
+        "Nenhum replay executado nesta sessão.";
+
+    document.getElementById("agentConsole").replaceChildren();
+
+    log("SYSTEM RESET: All simulation data cleared.", "console-warning");
+
+    updateDashboard();
+
+    publishEvent("TED");
+    publishEvent("BOLETO");
+    publishEvent("DEBITO_AUTOMATICO");
+
+}
+
+/* =====================================================
+   INITIALIZATION
+===================================================== */
+
+function initialize() {
+
+    log("Initializing Kafka Offset Bridge...", "console-info");
+
+    log("Loading consumer groups...", "console-info");
+
+    log("Registering payment event contracts...", "console-info");
+
+    log("Connecting simulated MCP tools...", "console-info");
+
+    publishEvent("TED");
+    publishEvent("BOLETO");
+    publishEvent("DEBITO_AUTOMATICO");
+
+    log("Initial events published successfully.", "console-success");
+
+    log("Observability dashboard ready.", "console-success");
+
+    updateDashboard();
+
+    state.timer = setInterval(simulationStep, 5000);
+
+}
+
+initialize();
+
+</script>
+
+</body>
+</html>
