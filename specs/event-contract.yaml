@@ -1,0 +1,503 @@
+
+# ============================================================
+# ITAU - INTEGRACAO DE PAGAMENTOS LEGADO / CLOUD
+# FILE: specs/event-contract.yaml
+# VERSION: 2.0.0
+# FORMAT: YAML
+# ============================================================
+
+contract:
+  name: payment-event-contract
+  version: "2.0.0"
+  description: "Contrato de integracao de pagamentos"
+  encoding: UTF-8
+  timezone: America/Sao_Paulo
+  currency: BRL
+
+  scope:
+    supported:
+      - TED
+      - BOLETO
+      - DEBITO_AUTOMATICO
+    excluded:
+      - PIX
+      - ANTIFRAUD
+      - CARTAO
+
+  compatibility:
+    schema_version_required: true
+    reject_unknown_fields: true
+    backward_compatibility: additive_only
+
+# ============================================================
+# EVENT ENVELOPE
+# ============================================================
+
+event:
+  required:
+    - event_id
+    - event_type
+    - schema_version
+    - occurred_at
+    - source
+    - correlation_id
+    - payload
+
+  properties:
+
+    event_id:
+      type: string
+      format: uuid
+
+    event_type:
+      type: string
+      enum:
+        - payment.received
+        - payment.validated
+        - payment.rejected
+        - payment.processing
+        - payment.completed
+        - payment.failed
+        - payment.reconciliation_required
+
+    schema_version:
+      type: string
+      enum:
+        - "2.0.0"
+
+    occurred_at:
+      type: string
+      format: date-time
+
+    source:
+      type: string
+      min_length: 1
+      max_length: 50
+
+    correlation_id:
+      type: string
+      format: uuid
+
+    payload:
+      type: object
+
+# ============================================================
+# COMMON PAYMENT FIELDS
+# ============================================================
+
+payment:
+  required:
+    - transaction_id
+    - payment_type
+    - amount
+    - currency
+    - requested_at
+    - source_system
+
+  properties:
+
+    transaction_id:
+      type: string
+      format: uuid
+      unique: true
+
+    payment_type:
+      type: string
+      enum:
+        - TED
+        - BOLETO
+        - DEBITO_AUTOMATICO
+
+    amount:
+      type: string
+      pattern: '^(0|[1-9][0-9]{0,11})\.[0-9]{2}$'
+      description: "Valor monetario decimal sem ambiguidade de ponto flutuante"
+
+    currency:
+      type: string
+      enum:
+        - BRL
+
+    requested_at:
+      type: string
+      format: date-time
+
+    source_system:
+      type: string
+      min_length: 1
+      max_length: 50
+
+    idempotency_key:
+      type: string
+      min_length: 16
+      max_length: 128
+
+    scheduled_at:
+      type: string
+      format: date-time
+
+    metadata:
+      type: object
+
+# ============================================================
+# TED
+# ============================================================
+
+ted:
+  enabled: true
+
+  required:
+    - destination_bank
+    - destination_branch
+    - destination_account
+    - account_digit
+    - account_type
+    - beneficiary_document
+    - beneficiary_name
+
+  properties:
+
+    destination_bank:
+      type: string
+      pattern: '^[0-9]{3,8}$'
+
+    destination_branch:
+      type: string
+      min_length: 1
+      max_length: 10
+
+    destination_account:
+      type: string
+      min_length: 1
+      max_length: 20
+
+    account_digit:
+      type: string
+      min_length: 1
+      max_length: 2
+
+    account_type:
+      type: string
+      enum:
+        - CORRENTE
+        - POUPANCA
+
+    beneficiary_document:
+      type: string
+      pattern: '^[0-9]{11}$|^[0-9]{14}$'
+
+    beneficiary_name:
+      type: string
+      min_length: 2
+      max_length: 150
+
+    purpose:
+      type: string
+      max_length: 50
+
+  validation:
+    validate_bank_code: true
+    validate_branch: true
+    validate_account: true
+    validate_cpf_cnpj: true
+    check_operating_calendar: true
+    check_cutoff_time: true
+
+  processing:
+    unknown_result_requires_reconciliation: true
+    automatic_duplicate_submission: false
+
+# ============================================================
+# BOLETO
+# ============================================================
+
+boleto:
+  enabled: true
+
+  required:
+    - barcode
+    - due_date
+    - payer_document
+
+  properties:
+
+    barcode:
+      type: string
+      pattern: '^[0-9]{44}$'
+
+    digitable_line:
+      type: string
+      pattern: '^[0-9]{47,48}$'
+
+    due_date:
+      type: string
+      format: date
+
+    payer_document:
+      type: string
+      pattern: '^[0-9]{11}$|^[0-9]{14}$'
+
+    payer_name:
+      type: string
+      max_length: 150
+
+    document_amount:
+      type: string
+      pattern: '^(0|[1-9][0-9]{0,11})\.[0-9]{2}$'
+
+  validation:
+    validate_barcode_length: true
+    validate_check_digits: true
+    validate_digitable_line: true
+    validate_due_date: true
+    validate_document_amount: true
+    compare_payment_amount: true
+
+  processing:
+    unknown_result_requires_reconciliation: true
+    automatic_duplicate_submission: false
+
+# ============================================================
+# DEBITO AUTOMATICO
+# ============================================================
+
+debito_automatico:
+  enabled: true
+
+  required:
+    - agreement_id
+    - customer_id
+    - account_holder_document
+    - debit_account
+    - debit_date
+    - authorization
+
+  properties:
+
+    agreement_id:
+      type: string
+      min_length: 1
+      max_length: 50
+
+    customer_id:
+      type: string
+      min_length: 1
+      max_length: 50
+
+    account_holder_document:
+      type: string
+      pattern: '^[0-9]{11}$|^[0-9]{14}$'
+
+    debit_account:
+      type: string
+      min_length: 1
+      max_length: 30
+
+    debit_date:
+      type: string
+      format: date
+
+    authorization:
+      type: object
+      required:
+        - authorization_id
+        - status
+        - authorized_at
+        - evidence_reference
+
+      properties:
+        authorization_id:
+          type: string
+          format: uuid
+
+        status:
+          type: string
+          enum:
+            - AUTHORIZED
+
+        authorized_at:
+          type: string
+          format: date-time
+
+        evidence_reference:
+          type: string
+          min_length: 1
+          max_length: 255
+
+  validation:
+    verify_authorization_with_source: true
+    verify_agreement: true
+    verify_account_ownership: true
+    verify_debit_date: true
+
+  processing:
+    unknown_result_requires_reconciliation: true
+    automatic_duplicate_submission: false
+
+# ============================================================
+# PAYMENT STATUS
+# ============================================================
+
+status:
+  initial: RECEBIDO
+
+  allowed:
+    - RECEBIDO
+    - VALIDADO
+    - PENDENTE
+    - PROCESSANDO
+    - CONCLUIDO
+    - REJEITADO
+    - ERRO
+    - RECONCILIACAO_NECESSARIA
+
+  transitions:
+    RECEBIDO:
+      - VALIDADO
+      - REJEITADO
+
+    VALIDADO:
+      - PENDENTE
+      - PROCESSANDO
+      - REJEITADO
+
+    PENDENTE:
+      - PROCESSANDO
+      - REJEITADO
+
+    PROCESSANDO:
+      - CONCLUIDO
+      - ERRO
+      - RECONCILIACAO_NECESSARIA
+
+    ERRO:
+      - PENDENTE
+      - RECONCILIACAO_NECESSARIA
+
+    RECONCILIACAO_NECESSARIA:
+      - CONCLUIDO
+      - ERRO
+      - PENDENTE
+
+    CONCLUIDO: []
+
+    REJEITADO: []
+
+# ============================================================
+# IDEMPOTENCY
+# ============================================================
+
+idempotency:
+  enabled: true
+  key_field: idempotency_key
+  scope:
+    - source_system
+    - payment_type
+  database_unique_constraint: true
+
+  behavior:
+    same_key_same_payload: RETURN_EXISTING_TRANSACTION
+    same_key_different_payload: REJECT_CONFLICT
+    missing_key: REJECT
+
+  retention_days: 365
+
+# ============================================================
+# RETRIES AND ERROR HANDLING
+# ============================================================
+
+retry:
+  max_attempts: 3
+  initial_interval_seconds: 30
+  exponential_backoff: true
+
+  retry_allowed_only_when:
+    - FAILURE_CONFIRMED
+    - OPERATION_NOT_EXECUTED
+
+  retry_forbidden_when:
+    - RESULT_UNKNOWN
+    - PAYMENT_ALREADY_COMPLETED
+    - DUPLICATE_TRANSACTION
+
+  unknown_result:
+    action: RECONCILIACAO_NECESSARIA
+    require_status_consultation: true
+
+# ============================================================
+# SECURITY
+# ============================================================
+
+security:
+  transport:
+    protocol: HTTPS
+    tls_required: true
+
+  credentials:
+    store_in_event: false
+    log_credentials: false
+
+  sensitive_data:
+    encrypt_at_rest: true
+    mask_in_logs: true
+
+  audit:
+    enabled: true
+    record_actor: true
+    record_timestamp: true
+    record_correlation_id: true
+
+# ============================================================
+# KAFKA INTEGRATION
+# ============================================================
+
+messaging:
+  enabled: true
+
+  topic:
+    received: payments.received
+    validated: payments.validated
+    processing: payments.processing
+    completed: payments.completed
+    failed: payments.failed
+    reconciliation: payments.reconciliation
+
+  delivery:
+    guarantee: AT_LEAST_ONCE
+    consumer_idempotency: required
+    ordering_key: transaction_id
+
+  publication:
+    publish_only_validated_payments: true
+    transactional_outbox: required
+
+# ============================================================
+# MCP INTEGRATION
+# ============================================================
+
+mcp:
+  enabled: true
+
+  permissions:
+    read_payment_status: true
+    inspect_errors: true
+    request_reconciliation: true
+    execute_payment: false
+    modify_bank_account: false
+    bypass_validation: false
+
+  approval:
+    financial_reprocessing_requires_authorization: true
+
+# ============================================================
+# EXCLUSIONS
+# ============================================================
+
+exclusions:
+  pix: false
+  antifraud: false
+  credit_cards: false
+
+# ============================================================
+# END OF CONTRACT
+# ============================================================
