@@ -1,8 +1,8 @@
-# Itaú Legacy Bridge MCP
+# Banking Legacy Bridge MCP
 
 Projeto de portfólio que demonstra uma arquitetura de integração e monitoramento de eventos financeiros usando conceitos de **Kafka, Event Store, Consumer Groups e MCP**.
 
-🔗 **Demonstração ao vivo:** https://thamyres127.github.io/itau-legacy-bridge-mcp/
+🔗 **Demonstração ao vivo:** [https://thamyres127.github.io/itau-legacy-bridge-mcp/](https://thamyres127.github.io/itau-legacy-bridge-mcp/)
 
 ## Problema que resolve
 
@@ -21,7 +21,6 @@ O sistema trabalha com três tipos de eventos:
 Eventos inválidos são identificados antes de serem considerados processados.
 
 ## Arquitetura
-
 ```text
 Producer
    ↓
@@ -59,7 +58,6 @@ O projeto utiliza bibliotecas nativas de Java e Python (`json`, `datetime` e `sq
 - Dashboard de observabilidade.
 
 ## Estrutura do projeto
-
 ```text
 itau-legacy-bridge-mcp/
 ├── index.html
@@ -73,7 +71,7 @@ itau-legacy-bridge-mcp/
 
 ## Observação
 
-Este projeto é uma demonstração educacional. Kafka, consumidores e integração do dashboard são simulados. O servidor Python utiliza SQLite em memória, e o SQL apresenta a estrutura proposta para PostgreSQL. Não existe conexão com sistemas internos ou operações reais do Itaú.
+Este projeto é uma demonstração educacional. Kafka, consumidores e integração do dashboard são simulados. O servidor Python utiliza SQLite em memória, e o SQL apresenta a estrutura proposta para PostgreSQL. Não existe conexão com sistemas internos ou operações financeiras reais.
 
 ## Objetivo
 
